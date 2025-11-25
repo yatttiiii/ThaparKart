@@ -1,6 +1,7 @@
 // src/App.jsx
 import React, { Suspense, lazy, useState, useEffect } from "react";
 import { Routes, Route, useNavigate } from "react-router-dom";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // --- Lazy imports (each one is now a normal static import) ---
 const About = lazy(() => import("./pages/about.jsx"));
@@ -64,7 +65,7 @@ function ProtectedAdminPage() {
   useEffect(() => {
     const verifyAdmin = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/profile", {
+        const res = await fetch(`${API_BASE_URL}/api/profile`, {
           credentials: "include",
         });
 
