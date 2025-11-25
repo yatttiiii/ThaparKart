@@ -11,6 +11,7 @@ import linkedinIcon from "../assets/icons/linkedin.svg";
 import youtubeIcon from "../assets/icons/youtube.svg";
 
 import "../styles/Product_Detail_Page.css";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const initialProduct = {
   title: "Casio Scientific Calculator FX-991ES",
@@ -92,7 +93,7 @@ export const ProductDetailWithLogin = () => {
         setLoadingListing(true);
 
         const res = await fetch(
-          `http://localhost:5000/api/listings/${listingId}`
+          `${API_BASE_URL}/api/listings/${listingId}`
         );
         if (!res.ok) {
           throw new Error("Failed to load listing");
@@ -134,7 +135,7 @@ export const ProductDetailWithLogin = () => {
     const fetchRelated = async () => {
       try {
         setLoadingRelated(true);
-        const res = await fetch("http://localhost:5000/api/listings");
+        const res = await fetch(`${API_BASE_URL}/api/listings`);
         if (!res.ok) {
           throw new Error("Failed to load related listings");
         }
@@ -209,7 +210,7 @@ export const ProductDetailWithLogin = () => {
   try {
     setIsReserving(true);
 
-    const res = await fetch("http://localhost:5000/api/orders", {
+    const res = await fetch(`${API_BASE_URL}/api/orders`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       credentials: "include",

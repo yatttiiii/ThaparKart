@@ -13,6 +13,7 @@ import avatarImg from "../assets/icons/avatar.svg";
 import editIcon from "../assets/icons/edit.svg";
 
 import "../styles/My_Account_Security.css";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const MyAccountSecurity = () => {
   const navigate = useNavigate();
@@ -59,7 +60,7 @@ export const MyAccountSecurity = () => {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/profile", {
+        const res = await fetch(`${API_BASE_URL}/api/profile`, {
           credentials: "include",
         });
 
@@ -90,7 +91,7 @@ export const MyAccountSecurity = () => {
     if (!profileDirty) return;
 
     try {
-      const res = await fetch("http://localhost:5000/api/profile", {
+      const res = await fetch(`${API_BASE_URL}/api/profile`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",
@@ -126,7 +127,7 @@ export const MyAccountSecurity = () => {
     }
 
     try {
-      const res = await fetch("http://localhost:5000/api/change-password", {
+      const res = await fetch(`${API_BASE_URL}/api/change-password`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

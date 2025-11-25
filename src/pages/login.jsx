@@ -6,6 +6,7 @@ import image1 from "../assets/image-1.png";
 import BackButton from "../assets/icons/BackButton.svg";
 
 import "../styles/Login.css";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 // emails that should have admin access
 const ADMIN_EMAILS = [
@@ -35,7 +36,7 @@ export const Login = () => {
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:5000/api/auth/login", {
+      const res = await fetch(`${API_BASE_URL}/api/auth/login`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

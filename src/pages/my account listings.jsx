@@ -13,6 +13,7 @@ import avatarImg from "../assets/icons/avatar.svg";
 import editIcon from "../assets/icons/edit.svg";
 
 import "../styles/My_Account_Listings.css";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const MyAccountListings = () => {
   const navigate = useNavigate();
@@ -58,10 +59,10 @@ export const MyAccountListings = () => {
     const fetchData = async () => {
       try {
         const [profileRes, listingsRes] = await Promise.all([
-          fetch("http://localhost:5000/api/profile", {
+          fetch(`${API_BASE_URL}/api/profile`, {
             credentials: "include",
           }),
-          fetch("http://localhost:5000/api/my-listings", {
+          fetch(`${API_BASE_URL}/api/my-listings`, {
             credentials: "include",
           }),
         ]);
@@ -124,7 +125,7 @@ export const MyAccountListings = () => {
       setSaving(true);
       setIsSaved(false);
 
-      const res = await fetch("http://localhost:5000/api/profile", {
+      const res = await fetch(`${API_BASE_URL}/api/profile`, {
         method: "PUT",
         headers: { "Content-Type": "application/json" },
         credentials: "include",

@@ -12,6 +12,7 @@ import image1 from "../assets/image-1.png";
 import BackButton from "../assets/icons/BackButton.svg";
 
 import "../styles/Shop.css";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const HealthiconsMagnifyingGlassOutline = ({ className = "" }) => (
   <img src={MagnifyingGlassIcon} className={className} alt="search" />
@@ -45,7 +46,7 @@ export const ShopLogin = () => {
     const fetchNewArrivals = async () => {
       try {
         setLoadingArrivals(true);
-        const res = await fetch("http://localhost:5000/api/listings", {
+        const res = await fetch(`${API_BASE_URL}/api/listings`, {
           credentials: "include",
         });
 

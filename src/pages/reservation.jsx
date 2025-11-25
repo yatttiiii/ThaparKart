@@ -11,6 +11,7 @@ import linkedinIcon from "../assets/icons/linkedin.svg";
 import youtubeIcon from "../assets/icons/youtube.svg";
 
 import "../styles/Reservation.css";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 export const Reservation = () => {
   const navigate = useNavigate();
@@ -28,7 +29,7 @@ export const Reservation = () => {
     try {
       setLoading(true);
 
-      const res = await fetch("http://localhost:5000/api/orders", {
+      const res = await fetch(`${API_BASE_URL}/api/orders`, {
         credentials: "include",
       });
 

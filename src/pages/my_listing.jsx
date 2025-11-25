@@ -10,6 +10,7 @@ import linkedinIcon from "../assets/icons/linkedin.svg";
 import youtubeIcon from "../assets/icons/youtube.svg";
 
 import "../styles/My_Listing.css";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
 
 const getStatusStyles = (statusRaw) => {
   const status = (statusRaw || "").toLowerCase();
@@ -39,7 +40,7 @@ export const MyListing = () => {
         setLoading(true);
 
         // ✅ must match backend: GET /api/listings/mine
-        const res = await fetch("http://localhost:5000/api/listings/mine", {
+        const res = await fetch(`${API_BASE_URL}/api/listings/mine`, {
           credentials: "include",
         });
 
@@ -95,7 +96,7 @@ export const MyListing = () => {
     try {
       // ✅ must match backend: DELETE /api/listings/:id
       const res = await fetch(
-        `http://localhost:5000/api/listings/${id}`,
+        `${API_BASE_URL}/api/listings/${id}`,
         {
           method: "DELETE",
           credentials: "include",
