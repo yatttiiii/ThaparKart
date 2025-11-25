@@ -21,6 +21,9 @@ export const AdminPage = () => {
   // 🔹 NEW: recent listings for "Recent activity"
   const [recentListings, setRecentListings] = useState([]);
 
+  // API base URL
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   // Load dark mode & admin flag
   useEffect(() => {
     try {
@@ -43,7 +46,7 @@ export const AdminPage = () => {
         setLoadingFeedback(true);
         setFeedbackError("");
 
-        const res = await fetch("http://localhost:5000/api/feedback", {
+        const res = await fetch(`${API_BASE_URL}/api/feedback`, {
           credentials: "include",
         });
 
@@ -63,7 +66,7 @@ export const AdminPage = () => {
     };
 
     fetchFeedbacks();
-  }, [isAdmin]);
+  }, [isAdmin, API_BASE_URL]);
 
   // Fetch stats only if admin
   useEffect(() => {
@@ -74,7 +77,7 @@ export const AdminPage = () => {
         setLoadingStats(true);
         setStatsError("");
 
-        const res = await fetch("http://localhost:5000/api/admin/stats", {
+        const res = await fetch(`${API_BASE_URL}/api/admin/stats`, {
           credentials: "include",
         });
 
@@ -99,7 +102,7 @@ export const AdminPage = () => {
     };
 
     fetchStats();
-  }, [isAdmin]);
+  }, [isAdmin, API_BASE_URL]);
 
   // 🔹 NEW: fetch recent listings for "Recent activity"
   useEffect(() => {
@@ -107,7 +110,7 @@ export const AdminPage = () => {
 
     const fetchRecentListings = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/listings", {
+        const res = await fetch(`${API_BASE_URL}/api/listings`, {
           credentials: "include",
         });
 
@@ -125,7 +128,7 @@ export const AdminPage = () => {
     };
 
     fetchRecentListings();
-  }, [isAdmin]);
+  }, [isAdmin, API_BASE_URL]);
 
   const handleBack = () => navigate(-1);
   const handleHome = () => navigate("/landing-login");
@@ -167,7 +170,7 @@ export const AdminPage = () => {
   // Export CSV handler (uses /api/admin/export)
   const handleExportCsv = async () => {
     try {
-      const res = await fetch("http://localhost:5000/api/admin/export", {
+      const res = await fetch(`${API_BASE_URL}/api/admin/export`, {
         credentials: "include",
       });
 

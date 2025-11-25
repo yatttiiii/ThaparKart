@@ -11,6 +11,8 @@ import linkedinIcon from "../assets/icons/linkedin.svg";
 import youtubeIcon from "../assets/icons/youtube.svg";
 
 import "../styles/Edit_Listings.css";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 const HealthiconsMagnifyingGlassOutline = ({ className = "" }) => (
   <img src={MagnifyingGlassIcon} className={className} alt="search" />
@@ -37,7 +39,7 @@ export const EditListings = () => {
     const fetchListing = async () => {
       try {
         setLoadingListing(true);
-        const res = await fetch(`http://localhost:5000/api/listings/${id}`, {
+        const res = await fetch(`${API_BASE_URL}/api/listings/${id}`, {
           credentials: "include",
         });
 
@@ -133,7 +135,7 @@ export const EditListings = () => {
         imageUrls: imagePreviews, // these will become the listing images
       };
 
-      const res = await fetch(`http://localhost:5000/api/listings/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/listings/${id}`, {
         method: "PUT",
         headers: {
           "Content-Type": "application/json",
@@ -164,7 +166,7 @@ export const EditListings = () => {
     if (!ok) return;
 
     try {
-      const res = await fetch(`http://localhost:5000/api/listings/${id}`, {
+      const res = await fetch(`${API_BASE_URL}/api/listings/${id}`, {
         method: "DELETE",
         credentials: "include",
       });

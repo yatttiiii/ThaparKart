@@ -12,6 +12,8 @@ import linkedinIcon from "../assets/icons/linkedin.svg";
 import youtubeIcon from "../assets/icons/youtube.svg";
 
 import "../styles/All_Listing.css";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 export const AllListingLogin = () => {
   const navigate = useNavigate();
@@ -76,7 +78,7 @@ export const AllListingLogin = () => {
   useEffect(() => {
     const fetchListings = async () => {
       try {
-        const res = await fetch("http://localhost:5000/api/listings");
+        const res = await fetch(`${API_BASE_URL}/api/listings`);
         if (!res.ok) {
           throw new Error("Failed to load listings");
         }

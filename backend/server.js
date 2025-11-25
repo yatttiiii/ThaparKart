@@ -12,34 +12,35 @@ dotenv.config();
 const app = express();
 const PORT = process.env.PORT || 5000;
 
+// 🔹 Tell Express it’s behind a proxy (Render), so secure cookies work properly
+app.set("trust proxy", 1);
+
 console.log("MONGO_URI from env:", process.env.MONGO_URI);
 connectDB();
-
 
 app.use(
   cors({
     origin: [
       "http://localhost:5173",         // Vite dev
       "http://localhost:4173",         // Vite preview (npm run preview)
-      "https://thaparkart.tiiny.site", // your Tiiny Host frontend
-      // later you can add Netlify / other domains here
-      // e.g. "https://thaparkart.netlify.app"
+      "https://thaparkart.tiiny.site", // Tiiny Host frontend
+      "https://thaparkart.netlify.app" // (optional) Netlify if you use it
     ],
     credentials: true,
   })
 );
 
-
+// 🔹 You can keep 10mb or bump to 25mb – leaving 25mb is safer
 app.use(
   express.json({
-    limit: "10mb",
+    limit: "25mb",
   })
 );
 
 app.use(
   express.urlencoded({
     extended: true,
-    limit: "10mb",
+    limit: "25mb",
   })
 );
 

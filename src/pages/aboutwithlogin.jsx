@@ -45,6 +45,9 @@ const HealthiconsMagnifyingGlassOutline = ({ className = "" }) => (
 export const AboutWithLogin = () => {
   const navigate = useNavigate();
 
+  // API base URL from env
+  const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
   // Contact form state
   const [firstName, setFirstName] = useState("");
   const [lastName, setLastName] = useState("");
@@ -53,34 +56,33 @@ export const AboutWithLogin = () => {
   const [submitting, setSubmitting] = useState(false);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    const res = await fetch("http://localhost:5000/api/feedback", {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify({ firstName, lastName, email, message }),
-    });
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/feedback`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ firstName, lastName, email, message }),
+      });
 
-    const data = await res.json();
+      const data = await res.json();
 
-    if (!res.ok) {
-      alert(data.message || "Failed to send feedback.");
-      return;
+      if (!res.ok) {
+        alert(data.message || "Failed to send feedback.");
+        return;
+      }
+
+      alert("Thank you! Your feedback has been submitted.");
+
+      setFirstName("");
+      setLastName("");
+      setEmail("");
+      setMessage("");
+    } catch (err) {
+      console.error("Network error:", err);
+      alert("Server error. Check backend logs.");
     }
-
-    alert("Thank you! Your feedback has been submitted.");
-
-    setFirstName("");
-    setLastName("");
-    setEmail("");
-    setMessage("");
-  } catch (err) {
-    console.error("Network error:", err);
-    alert("Server error. Check backend logs.");
-  }
-};
-
+  };
 
   return (
     <div className="bg-white min-h-screen flex flex-col relative">

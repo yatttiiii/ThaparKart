@@ -11,6 +11,8 @@ import linkedinIcon from "../assets/icons/linkedin.svg";
 import youtubeIcon from "../assets/icons/youtube.svg";
 
 import "../styles/Create_a_Listing_with_Login.css";
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
+
 
 const HealthiconsMagnifyingGlassOutline = ({ className = "" }) => (
   <img src={MagnifyingGlassIcon} className={className} alt="search" />
@@ -82,7 +84,7 @@ export const CreateListingWithLogin = () => {
       setSubmitting(true);
       setPosted(false);
 
-      const res = await fetch("http://localhost:5000/api/listings", {
+      const res = await fetch(`${API_BASE_URL}/api/listings`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",

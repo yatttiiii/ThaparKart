@@ -1,15 +1,16 @@
-// backend/controllers/authController.js
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
 
-const JWT_EXPIRES_IN = "7d"; // you can change later
+const JWT_EXPIRES_IN = "7d";
+
+// Detect production (Render runs Node with NODE_ENV=production)
+const isProduction = process.env.NODE_ENV === "production";
 
 export const registerUser = async (req, res) => {
   try {
     const { name, email, password } = req.body;
 
-    // basic checks
     if (!name || !email || !password) {
       return res.status(400).json({ message: "All fields are required." });
     }
@@ -27,8 +28,7 @@ export const registerUser = async (req, res) => {
         .json({ message: "An account with this email already exists." });
     }
 
-    const saltRounds = 10;
-    const passwordHash = await bcrypt.hash(password, saltRounds);
+    const passwordHash = await bcrypt.hash(password, 10);
 
     const user = await User.create({
       name: name.trim(),
@@ -36,7 +36,6 @@ export const registerUser = async (req, res) => {
       passwordHash,
     });
 
-    // no need to auto-login on register (for now)
     return res.status(201).json({
       message: "Registration successful. Please login.",
       user: {
@@ -56,7 +55,9 @@ export const loginUser = async (req, res) => {
     const { email, password } = req.body;
 
     if (!email || !password) {
-      return res.status(400).json({ message: "Email and password are required." });
+      return res
+        .status(400)
+        .json({ message: "Email and password are required." });
     }
 
     const user = await User.findOne({ email: email.toLowerCase() });
@@ -69,18 +70,18 @@ export const loginUser = async (req, res) => {
       return res.status(401).json({ message: "Invalid email or password." });
     }
 
-    // sign JWT
+    // Sign JWT
     const token = jwt.sign(
       { userId: user._id },
       process.env.JWT_SECRET || "dev-secret-change-this",
       { expiresIn: JWT_EXPIRES_IN }
     );
 
-    // send as httpOnly cookie + in body (for now)
+    // IMPORTANT: Cross-site cookie setup for Render <-> TiinyHost
     res.cookie("token", token, {
       httpOnly: true,
-      secure: false, // set true when you use https
-      sameSite: "lax",
+      secure: isProduction,             // must be true on Render
+      sameSite: isProduction ? "none" : "lax",
       maxAge: 7 * 24 * 60 * 60 * 1000,
     });
 
@@ -100,7 +101,11 @@ export const loginUser = async (req, res) => {
 };
 
 export const logoutUser = (req, res) => {
-  // clear token cookie
-  res.clearCookie("token");
+  res.clearCookie("token", {
+    httpOnly: true,
+    secure: isProduction,
+    sameSite: isProduction ? "none" : "lax",
+  });
+
   return res.json({ message: "Logged out successfully." });
 };
