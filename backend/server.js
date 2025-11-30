@@ -24,7 +24,7 @@ app.use(
       "http://localhost:5173",         // Vite dev
       "http://localhost:4173",         // Vite preview (npm run preview)
       "https://thaparkart.tiiny.site", // Tiiny Host frontend
-      "https://thaparkart.netlify.app" // (optional) Netlify if you use it
+      "https://thaparkart.onrender.com" // (optional) Netlify if you use it
     ],
     credentials: true,
   })
