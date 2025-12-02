@@ -9,6 +9,12 @@ import facebookIcon from "../assets/icons/facebook.svg";
 import instagramIcon from "../assets/icons/instagram.svg";
 import linkedinIcon from "../assets/icons/linkedin.svg";
 import youtubeIcon from "../assets/icons/youtube.svg";
+import image11 from "../assets/image-11.png";
+import image12 from "../assets/image-12.png";
+import image13 from "../assets/image-13.png";
+import image14 from "../assets/image-14.png";
+import image15 from "../assets/image-15.png";
+import image16 from "../assets/image-16.png";
 
 import "../styles/article.css";
 
@@ -115,7 +121,8 @@ export const Article = () => {
                 </span>
                 <span className="text-[#c90202]">Thapar</span>
                 <span className="text-black">
-                Kart Helps Students Go Green
+                  {" "}
+                  Kart Helps Students Go Green
                 </span>
               </h1>
 
@@ -129,73 +136,69 @@ export const Article = () => {
             {/* Hero image – shadow same as LandingPage */}
             <div
               className="w-full h-[260px] sm:h-[360px] md:h-[480px] lg:h-[650px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] bg-cover bg-center"
-              style={{ backgroundImage: 'url("/image.png")' }}
+              style={{ backgroundImage: `url(${image15})` }}
             />
           </div>
         </section>
 
         {/* Article body – first text block */}
         <section className="w-[90%] mx-auto pb-12 md:pb-16">
-  <div className="text-[18px] md:text-[20px] leading-[1.8] text-black font-small text-justify">
-    <p className="mb-6">
-      At ThaparKart, we believe that one student’s unused item can be another’s perfect find. 
-      By promoting buying and selling within campus, we reduce unnecessary waste and 
-      encourage a circular economy.
-    </p>
+          <div className="text-[18px] md:text-[20px] leading-[1.8] text-black font-small text-justify">
+            <p className="mb-6">
+              At ThaparKart, we believe that one student’s unused item can be another’s perfect find. 
+              By promoting buying and selling within campus, we reduce unnecessary waste and 
+              encourage a circular economy.
+            </p>
 
-    <p className="mb-6">
-      From cycle resales to book exchanges, every transaction on ThaparKart saves resources 
-      that would otherwise go unused. It’s not just about saving money — it’s about being 
-      mindful of what we own and how we share it.
-    </p>
+            <p className="mb-6">
+              From cycle resales to book exchanges, every transaction on ThaparKart saves resources 
+              that would otherwise go unused. It’s not just about saving money — it’s about being 
+              mindful of what we own and how we share it.
+            </p>
 
-    <p className="mb-6">
-      Every product listed tells a story — a laptop that found a new home, a set of notes 
-      passed on to help someone score better, or a hostel chair reused instead of being 
-      discarded. Each small action contributes to a greener Thapar campus.
-    </p>
+            <p className="mb-6">
+              Every product listed tells a story — a laptop that found a new home, a set of notes 
+              passed on to help someone score better, or a hostel chair reused instead of being 
+              discarded. Each small action contributes to a greener Thapar campus.
+            </p>
 
-    <p>
-      As a student-run initiative, ThaparKart aims to empower students to make sustainable 
-      choices effortlessly while keeping convenience and affordability at the forefront.
-    </p>
-  </div>
-</section>
-
+            <p>
+              As a student-run initiative, ThaparKart aims to empower students to make sustainable 
+              choices effortlessly while keeping convenience and affordability at the forefront.
+            </p>
+          </div>
+        </section>
 
         {/* Two side images – shadow same as LandingPage */}
         <section className="w-[90%] mx-auto pb-12 md:pb-16">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div
               className="w-full h-[260px] md:h-[360px] lg:h-[436px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] bg-cover bg-center"
-              style={{ backgroundImage: 'url("/image-2.png")' }}
+              style={{ backgroundImage: `url(${image14})` }}
             />
             <div
               className="w-full h-[260px] md:h-[360px] lg:h-[436px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] bg-cover bg-center"
-              style={{ backgroundImage: 'url("/image-3.png")' }}
+              style={{ backgroundImage: `url(${image16})` }}
             />
           </div>
         </section>
 
         {/* Second text block */}
         <section className="w-[90%] mx-auto pb-12 md:pb-16">
-  <div className="text-[18px] md:text-[20px] leading-[1.8] text-black font-small text-justify">
-    
-    <p className="mb-6">
-      ThaparKart is more than just a campus marketplace — it’s a community built by students, 
-      for students. Whether you’re looking for affordable textbooks, a cycle to commute, or 
-      decor for your hostel room.
-    </p>
+          <div className="text-[18px] md:text-[20px] leading-[1.8] text-black font-small text-justify">
+            <p className="mb-6">
+              ThaparKart is more than just a campus marketplace — it’s a community built by students, 
+              for students. Whether you’re looking for affordable textbooks, a cycle to commute, or 
+              decor for your hostel room.
+            </p>
 
-    <p>
-      ThaparKart connects buyers and sellers across the Thapar campus safely and easily. Every 
-      listing you browse or post contributes to a more sustainable and connected student 
-      community.
-    </p>
-
-  </div>
-</section>
-
+            <p>
+              ThaparKart connects buyers and sellers across the Thapar campus safely and easily. Every 
+              listing you browse or post contributes to a more sustainable and connected student 
+              community.
+            </p>
+          </div>
+        </section>
 
         {/* You May Also Like */}
         <section className="w-[90%] mx-auto pb-16 md:pb-20">
@@ -206,7 +209,13 @@ export const Article = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Card 1 */}
             <div className="flex flex-col items-start gap-4 cursor-pointer hover:scale-[1.02] transition-transform">
-              <div className="w-full h-[220px] md:h-[260px] bg-[#f7f7f7] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)]" />
+              <div className="w-full h-[220px] md:h-[260px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] overflow-hidden bg-[#f7f7f7]">
+                <img
+                  src={image11}
+                  alt="5 Smart Ways to Reuse and Save on Campus"
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <div>
                 <p className="font-body-text text-black">
                   5 Smart Ways to Reuse and Save on Campus
@@ -219,7 +228,13 @@ export const Article = () => {
 
             {/* Card 2 */}
             <div className="flex flex-col items-start gap-4 cursor-pointer hover:scale-[1.02] transition-transform">
-              <div className="w-full h-[220px] md:h-[260px] bg-[#f7f7f7] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)]" />
+              <div className="w-full h-[220px] md:h-[260px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] overflow-hidden bg-[#f7f7f7]">
+                <img
+                  src={image12}
+                  alt="Student Success Stories"
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <div>
                 <p className="font-body-text text-black">
                   Student Success Stories: How I Earned ₹2000 from My Old Books
@@ -230,7 +245,13 @@ export const Article = () => {
 
             {/* Card 3 */}
             <div className="flex flex-col items-start gap-4 cursor-pointer hover:scale-[1.02] transition-transform">
-              <div className="w-full h-[220px] md:h-[260px] bg-[#f7f7f7] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)]" />
+              <div className="w-full h-[220px] md:h-[260px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] overflow-hidden bg-[#f7f7f7]">
+                <img
+                  src={image13}
+                  alt="Inside ThaparKart"
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <div>
                 <p className="font-body-text text-black">
                   Inside ThaparKart: Building the Campus Marketplace Together

@@ -172,13 +172,25 @@ export const MyListing = () => {
             My Listings
           </h1>
 
-          <button
-            type="button"
-            onClick={handleAddNew}
-            className="px-6 py-3.5 rounded-[999px] bg-black text-white shadow-button-shadow hover:bg-[#1a1a1a] hover:scale-[1.02] active:scale-[0.98] transition-transform transition-colors"
-          >
-            Add New Item
-          </button>
+          {/* Wrapper for action buttons */}
+          <div className="flex items-center gap-3">
+            {/* New Messages Button */}
+            <button
+              type="button"
+              onClick={() => navigate("/chat")}
+              className="px-6 py-3.5 rounded-[999px] bg-white text-black border border-[#0000001a] shadow-sm hover:bg-gray-50 transition-colors"
+            >
+              Messages
+            </button>
+
+            <button
+              type="button"
+              onClick={handleAddNew}
+              className="px-6 py-3.5 rounded-[999px] bg-black text-white shadow-button-shadow hover:bg-[#1a1a1a] hover:scale-[1.02] active:scale-[0.98] transition-transform transition-colors"
+            >
+              Add New Item
+            </button>
+          </div>
         </div>
 
         {loading && (

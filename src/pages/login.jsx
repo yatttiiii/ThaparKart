@@ -20,6 +20,14 @@ export const Login = () => {
   const [password, setPassword] = useState("");
   const [loading, setLoading] = useState(false);
 
+  // Forgot Password States
+  const [showForgot, setShowForgot] = useState(false);
+  const [forgotStep, setForgotStep] = useState(1); // 1 = Email, 2 = OTP+Pass
+  const [forgotEmail, setForgotEmail] = useState("");
+  const [forgotOtp, setForgotOtp] = useState("");
+  const [forgotNewPass, setForgotNewPass] = useState("");
+  const [forgotLoading, setForgotLoading] = useState(false);
+
   const navigate = useNavigate();
 
   const handleLogin = async () => {
@@ -51,7 +59,6 @@ export const Login = () => {
       const data = await res.json().catch(() => ({}));
 
       if (!res.ok) {
-        // make sure we don't accidentally keep some old admin flag
         localStorage.setItem("isAdmin", "false");
         alert(data.message || "Login failed. Please try again.");
         return;
@@ -60,18 +67,15 @@ export const Login = () => {
       // -------- DETERMINE IF USER IS ADMIN --------
       let isAdmin = false;
 
-      // 1) If backend sends isAdmin, respect that first
       if (typeof data.isAdmin === "boolean") {
         isAdmin = data.isAdmin;
       } else if (data.user && typeof data.user.isAdmin === "boolean") {
         isAdmin = data.user.isAdmin;
       } else {
-        // 2) Fallback: check against hard-coded admin emails
         const lower = email.toLowerCase();
         isAdmin = ADMIN_EMAILS.includes(lower);
       }
 
-      // store in localStorage so AdminPage can read it
       try {
         localStorage.setItem("isAdmin", isAdmin ? "true" : "false");
       } catch (err) {
@@ -88,6 +92,68 @@ export const Login = () => {
       } catch {}
     } finally {
       setLoading(false);
+    }
+  };
+
+  // --- FORGOT PASSWORD LOGIC ---
+
+  const handleSendResetOtp = async () => {
+    if (!forgotEmail.endsWith("@thapar.edu")) {
+      alert("Please enter a valid @thapar.edu email.");
+      return;
+    }
+    setForgotLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/send-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email: forgotEmail }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("OTP sent to your email!");
+        setForgotStep(2);
+      } else {
+        alert(data.message || "Failed to send OTP.");
+      }
+    } catch (err) {
+      alert("Server error sending OTP.");
+    } finally {
+      setForgotLoading(false);
+    }
+  };
+
+  const handleResetPassword = async () => {
+    if (!forgotOtp || !forgotNewPass) {
+      alert("Please fill in all fields.");
+      return;
+    }
+    setForgotLoading(true);
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/reset-password`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          email: forgotEmail,
+          otp: forgotOtp,
+          newPassword: forgotNewPass,
+        }),
+      });
+      const data = await res.json();
+      if (res.ok) {
+        alert("Password reset successfully! Please login with your new password.");
+        setShowForgot(false);
+        setForgotStep(1);
+        setForgotEmail("");
+        setForgotOtp("");
+        setForgotNewPass("");
+      } else {
+        alert(data.message || "Failed to reset password.");
+      }
+    } catch (err) {
+      alert("Server error resetting password.");
+    } finally {
+      setForgotLoading(false);
     }
   };
 
@@ -121,71 +187,138 @@ export const Login = () => {
 
       {/* Centered login card */}
       <div className="flex min-h-screen items-center justify-center px-4 py-10">
-        <div className="w-full max-w-[780px] bg-[#141414cc] rounded-[40px] md:rounded-[50px] px-6 py-8 md:px-12 md:py-10 text-white">
-          {/* Login Title */}
-          <h1 className="font-subheading font-bold text-[40px] md:text-[55px] text-center tracking-[1px] mb-8">
-            Login
-          </h1>
+        <div className="w-full max-w-[780px] bg-[#141414cc] rounded-[40px] md:rounded-[50px] px-6 py-8 md:px-12 md:py-10 text-white relative">
+          
+          {/* --- FORGOT PASSWORD OVERLAY --- */}
+          {showForgot ? (
+            <div className="flex flex-col items-center animate-fadeIn">
+              <h2 className="font-subheading font-bold text-[32px] mb-2 text-center">
+                Reset Password
+              </h2>
+              <p className="text-sm text-gray-300 mb-6 text-center">
+                {forgotStep === 1
+                  ? "Enter your email to receive a verification code."
+                  : "Enter the OTP sent to your email and your new password."}
+              </p>
 
-          {/* Inputs */}
-          <div className="space-y-5 md:space-y-6">
-            <input
-              type="email"
-              placeholder="Enter your @thapar.edu email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              className="w-full h-[50px] rounded-[30px] bg-[#ffffff1a] border border-gray-300 px-4 text-white placeholder:text-[#b2b2b2] outline-none focus:border-white"
-            />
+              <div className="w-full space-y-5">
+                {forgotStep === 1 ? (
+                  /* Step 1: Email */
+                  <input
+                    type="email"
+                    placeholder="Enter your @thapar.edu email"
+                    value={forgotEmail}
+                    onChange={(e) => setForgotEmail(e.target.value)}
+                    className="w-full h-[50px] rounded-[30px] bg-[#ffffff1a] border border-gray-300 px-4 text-white placeholder:text-[#b2b2b2] outline-none focus:border-white"
+                  />
+                ) : (
+                  /* Step 2: OTP + New Pass */
+                  <>
+                    <input
+                      type="text"
+                      placeholder="Enter 6-digit OTP"
+                      value={forgotOtp}
+                      onChange={(e) => setForgotOtp(e.target.value)}
+                      className="w-full h-[50px] rounded-[30px] bg-[#ffffff1a] border border-gray-300 px-4 text-white placeholder:text-[#b2b2b2] outline-none focus:border-white"
+                    />
+                    <input
+                      type="password"
+                      placeholder="New Password"
+                      value={forgotNewPass}
+                      onChange={(e) => setForgotNewPass(e.target.value)}
+                      className="w-full h-[50px] rounded-[30px] bg-[#ffffff1a] border border-gray-300 px-4 text-white placeholder:text-[#b2b2b2] outline-none focus:border-white"
+                    />
+                  </>
+                )}
 
-            <input
-              type="password"
-              placeholder="Password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              className="w-full h-[50px] rounded-[30px] bg-[#ffffff1a] border border-gray-300 px-4 text-white placeholder:text-[#b2b2b2] outline-none focus:border-white"
-            />
+                <button
+                  onClick={forgotStep === 1 ? handleSendResetOtp : handleResetPassword}
+                  disabled={forgotLoading}
+                  className="w-full h-10 flex justify-center items-center bg-[#e73b3b] rounded-[50px] shadow-button-shadow cursor-pointer hover:bg-[#c90202] transition-transform disabled:opacity-70"
+                >
+                  {forgotLoading
+                    ? "Processing..."
+                    : forgotStep === 1
+                    ? "Send OTP"
+                    : "Reset Password"}
+                </button>
 
-            {/* Forgot + Remember */}
-            <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm md:text-base">
+                <button
+                  onClick={() => {
+                    setShowForgot(false);
+                    setForgotStep(1);
+                  }}
+                  className="block mx-auto text-sm text-white/80 hover:text-white mt-4 underline"
+                >
+                  Back to Login
+                </button>
+              </div>
+            </div>
+          ) : (
+            /* --- NORMAL LOGIN FORM --- */
+            <>
+              <h1 className="font-subheading font-bold text-[40px] md:text-[55px] text-center tracking-[1px] mb-8">
+                Login
+              </h1>
+
+              <div className="space-y-5 md:space-y-6">
+                <input
+                  type="email"
+                  placeholder="Enter your @thapar.edu email"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="w-full h-[50px] rounded-[30px] bg-[#ffffff1a] border border-gray-300 px-4 text-white placeholder:text-[#b2b2b2] outline-none focus:border-white"
+                />
+
+                <input
+                  type="password"
+                  placeholder="Password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="w-full h-[50px] rounded-[30px] bg-[#ffffff1a] border border-gray-300 px-4 text-white placeholder:text-[#b2b2b2] outline-none focus:border-white"
+                />
+
+                <div className="flex flex-col md:flex-row md:items-center md:justify-between gap-3 text-sm md:text-base">
+                  <button
+                    type="button"
+                    onClick={() => setShowForgot(true)}
+                    className="text-white/80 hover:text-white transition-colors"
+                  >
+                    Forgot password?
+                  </button>
+
+                  <label className="flex items-center gap-2 cursor-pointer">
+                    <input
+                      type="checkbox"
+                      checked={rememberMe}
+                      onChange={(e) => setRememberMe(e.target.checked)}
+                      className="w-4 h-4 accent-[#e73b3b]"
+                    />
+                    <span className="leading-none">Remember me</span>
+                  </label>
+                </div>
+
+                <button
+                  type="button"
+                  onClick={handleLogin}
+                  disabled={loading}
+                  className="mt-4 w-full h-10 flex justify-center items-center bg-[#e73b3b] rounded-[50px] shadow-button-shadow cursor-pointer hover:bg-[#c90202] hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-70 disabled:cursor-not-allowed"
+                >
+                  <span className="text-base font-medium">
+                    {loading ? "Logging in..." : "Login"}
+                  </span>
+                </button>
+              </div>
+
               <button
                 type="button"
-                className="text-white/80 hover:text-white transition-colors"
+                onClick={() => navigate("/register")}
+                className="mt-6 mx-auto block text-center text-sm md:text-base text-white/80 hover:text-white transition-colors"
               >
-                Forgot password?
+                New here? Get started.
               </button>
-
-              <label className="flex items-center gap-2 cursor-pointer">
-                <input
-                  type="checkbox"
-                  checked={rememberMe}
-                  onChange={(e) => setRememberMe(e.target.checked)}
-                  className="w-4 h-4 accent-[#e73b3b]"
-                />
-                <span className="leading-none">Remember me</span>
-              </label>
-            </div>
-
-            {/* Login Button */}
-            <button
-              type="button"
-              onClick={handleLogin}
-              disabled={loading}
-              className="mt-4 w-full h-10 flex justify-center items-center bg-[#e73b3b] rounded-[50px] shadow-button-shadow cursor-pointer hover:bg-[#c90202] hover:scale-[1.02] active:scale-[0.98] transition-transform disabled:opacity-70 disabled:cursor-not-allowed"
-            >
-              <span className="text-base font-medium">
-                {loading ? "Logging in..." : "Login"}
-              </span>
-            </button>
-          </div>
-
-          {/* New here */}
-          <button
-            type="button"
-            onClick={() => navigate("/register")}
-            className="mt-6 mx-auto block text-center text-sm md:text-base text-white/80 hover:text-white transition-colors"
-          >
-            New here? Get started.
-          </button>
+            </>
+          )}
         </div>
       </div>
 

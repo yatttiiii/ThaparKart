@@ -9,6 +9,12 @@ import facebookIcon from "../assets/icons/facebook.svg";
 import instagramIcon from "../assets/icons/instagram.svg";
 import linkedinIcon from "../assets/icons/linkedin.svg";
 import youtubeIcon from "../assets/icons/youtube.svg";
+import image11 from "../assets/image-11.png";
+import image12 from "../assets/image-12.png";
+import image13 from "../assets/image-13.png";
+import image14 from "../assets/image-14.png";
+import image15 from "../assets/image-15.png";
+import image16 from "../assets/image-16.png";
 
 import "../styles/Article_with_Login.css";
 
@@ -129,7 +135,7 @@ export const ArticleWithLogin = () => {
             {/* Hero image */}
             <div
               className="w-full h-[260px] sm:h-[360px] md:h-[480px] lg:h-[650px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] bg-cover bg-center"
-              style={{ backgroundImage: 'url("/image.png")' }}
+              style={{ backgroundImage: `url(${image15})` }}
             />
           </div>
         </section>
@@ -171,11 +177,11 @@ export const ArticleWithLogin = () => {
           <div className="grid grid-cols-1 md:grid-cols-2 gap-8">
             <div
               className="w-full h-[260px] md:h-[360px] lg:h-[436px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] bg-cover bg-center"
-              style={{ backgroundImage: 'url("/image-2.png")' }}
+              style={{ backgroundImage: `url(${image14})` }}
             />
             <div
               className="w-full h-[260px] md:h-[360px] lg:h-[436px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] bg-cover bg-center"
-              style={{ backgroundImage: 'url("/image-3.png")' }}
+              style={{ backgroundImage: `url(${image16})` }}
             />
           </div>
         </section>
@@ -207,7 +213,13 @@ export const ArticleWithLogin = () => {
           <div className="grid grid-cols-1 md:grid-cols-3 gap-8">
             {/* Card 1 */}
             <div className="flex flex-col items-start gap-4 cursor-pointer hover:scale-[1.02] transition-transform">
-              <div className="w-full h-[220px] md:h-[260px] bg-[#f7f7f7] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)]" />
+              <div className="w-full h-[220px] md:h-[260px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] overflow-hidden bg-[#f7f7f7]">
+                <img
+                  src={image11}
+                  alt="5 Smart Ways to Reuse and Save on Campus"
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <div>
                 <p className="font-body-text text-black">
                   5 Smart Ways to Reuse and Save on Campus
@@ -220,7 +232,13 @@ export const ArticleWithLogin = () => {
 
             {/* Card 2 */}
             <div className="flex flex-col items-start gap-4 cursor-pointer hover:scale-[1.02] transition-transform">
-              <div className="w-full h-[220px] md:h-[260px] bg-[#f7f7f7] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)]" />
+              <div className="w-full h-[220px] md:h-[260px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] overflow-hidden bg-[#f7f7f7]">
+                <img
+                  src={image12}
+                  alt="Student Success Stories"
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <div>
                 <p className="font-body-text text-black">
                   Student Success Stories: How I Earned ₹2000 from My Old Books
@@ -231,7 +249,13 @@ export const ArticleWithLogin = () => {
 
             {/* Card 3 */}
             <div className="flex flex-col items-start gap-4 cursor-pointer hover:scale-[1.02] transition-transform">
-              <div className="w-full h-[220px] md:h-[260px] bg-[#f7f7f7] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)]" />
+              <div className="w-full h-[220px] md:h-[260px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] overflow-hidden bg-[#f7f7f7]">
+                <img
+                  src={image13}
+                  alt="Inside ThaparKart"
+                  className="w-full h-full object-cover"
+                />
+              </div>
               <div>
                 <p className="font-body-text text-black">
                   Inside ThaparKart: Building the Campus Marketplace Together

@@ -10,6 +10,8 @@ import linkedinIcon from "../assets/icons/linkedin.svg";
 import youtubeIcon from "../assets/icons/youtube.svg";
 import image1 from "../assets/image-1.png";
 import BackButton from "../assets/icons/BackButton.svg";
+import image8 from "../assets/image-8.png";
+import image10 from "../assets/image-10.png";
 
 import "../styles/Shop.css";
 const API_BASE_URL = import.meta.env.VITE_API_BASE_URL;
@@ -191,7 +193,7 @@ export const ShopLogin = () => {
               <div className="rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] bg-white overflow-hidden">
                 <div className="w-full h-[210px] sm:h-[230px] md:h-[250px] lg:h-[260px]">
                   <img
-                    src="/image-2.png"
+                    src={image8}
                     alt="Featured Deals"
                     className="w-full h-full object-cover"
                   />
@@ -230,7 +232,7 @@ export const ShopLogin = () => {
               <div className="rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] bg-white overflow-hidden">
                 <div className="w-full h-[210px] sm:h-[230px] md:h-[250px] lg:h-[260px]">
                   <img
-                    src="/image-3.png"
+                    src={image10}
                     alt="Just Listed"
                     className="w-full h-full object-cover"
                   />

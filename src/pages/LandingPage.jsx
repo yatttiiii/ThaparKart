@@ -9,6 +9,13 @@ import linkedinIcon from "../assets/icons/linkedin.svg";
 import youtubeIcon from "../assets/icons/youtube.svg";
 
 import "../styles/Landing_Page.css";
+import image1 from "../assets/image-1.png";
+import image2 from "../assets/image-2.png";
+import image3 from "../assets/image-3.png";
+import image4 from "../assets/image-4.png";
+import image5 from "../assets/image-5.png";
+import image6 from "../assets/image-6.png";
+import image7 from "../assets/image-7.png";
 
 const HealthiconsMagnifyingGlassOutline = ({ className = "" }) => (
   <img src={MagnifyingGlassIcon} className={className} alt="search" />
@@ -116,7 +123,7 @@ export const LandingPage = () => {
             {/* Hero image */}
             <div
               className="mt-6 w-full h-[260px] sm:h-[360px] md:h-[480px] lg:h-[640px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] bg-cover bg-center"
-              style={{ backgroundImage: 'url("/hero-image.png")' }}
+              style={{ backgroundImage: `url(${image1})` }}
             />
           </div>
         </section>
@@ -132,7 +139,7 @@ export const LandingPage = () => {
             <div className="flex flex-col items-start gap-4">
               <div
                 className="w-full h-[260px] md:h-[320px] lg:h-[405px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] bg-cover bg-center"
-                style={{ backgroundImage: 'url("/image.png")' }}
+                style={{ backgroundImage: `url(${image4})` }}
               />
               <div>
                 <h3 className="font-semibold text-[18px] md:text-[20px] leading-[28px] text-black">
@@ -149,7 +156,7 @@ export const LandingPage = () => {
             <div className="flex flex-col items-start gap-4">
               <div
                 className="w-full h-[260px] md:h-[320px] lg:h-[405px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] bg-cover bg-center"
-                style={{ backgroundImage: 'url("/image-2.png")' }}
+                style={{ backgroundImage: `url(${image2})` }}
               />
               <div>
                 <h3 className="font-semibold text-[18px] md:text-[20px] leading-[28px] text-black">
@@ -166,7 +173,7 @@ export const LandingPage = () => {
             <div className="flex flex-col items-start gap-4">
               <div
                 className="w-full h-[260px] md:h-[320px] lg:h-[405px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] bg-cover bg-center"
-                style={{ backgroundImage: 'url("/image-3.png")' }}
+                style={{ backgroundImage: `url(${image3})` }}
               />
               <div>
                 <h3 className="font-semibold text-[18px] md:text-[20px] leading-[28px] text-black">
@@ -228,7 +235,7 @@ export const LandingPage = () => {
             {/* Image side */}
             <div
               className="w-full lg:w-[41.3%] min-h-[320px] lg:min-h-[500px] rounded-[20px] shadow-[0px_6px_20px_rgba(0,0,0,0.05)] bg-cover bg-center"
-              style={{ backgroundImage: 'url("/image-6.png")' }}
+              style={{ backgroundImage: `url(${image6})` }}
             />
           </div>
         </section>
@@ -302,7 +309,7 @@ export const LandingPage = () => {
             <div className="flex flex-col gap-6 flex-1">
               <div
                 className="w-full h-[220px] sm:h-[280px] md:h-[320px] lg:h-[341px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] bg-cover bg-center"
-                style={{ backgroundImage: 'url("/image-4.png")' }}
+                style={{ backgroundImage: `url(${image5})` }}
               />
               <div className="flex flex-col gap-2">
                 <p className="font-medium text-black text-xl md:text-2xl">
@@ -318,7 +325,7 @@ export const LandingPage = () => {
             <div className="flex flex-col gap-6 flex-1">
               <div
                 className="w-full h-[220px] sm:h-[280px] md:h-[320px] lg:h-[341px] rounded-lg shadow-[0px_6px_20px_rgba(0,0,0,0.05)] bg-cover bg-center"
-                style={{ backgroundImage: 'url("/image-5.png")' }}
+                style={{ backgroundImage: `url(${image7})` }}
               />
               <div className="flex flex-col gap-2">
                 <p className="font-medium text-black text-xl md:text-2xl">

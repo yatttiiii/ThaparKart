@@ -1,6 +1,7 @@
 // backend/controllers/userController.js
 import User from "../models/User.js";
 import Listing from "../models/Listing.js";
+import bcrypt from "bcryptjs"; // ✅ ADDED: Needed for password hashing
 
 // GET /api/profile
 export const getProfile = (req, res) => {
@@ -9,6 +10,7 @@ export const getProfile = (req, res) => {
     return res.status(401).json({ message: "Not authenticated" });
   }
 
+  // ✅ KEPTS YOUR WORKING LOGIC
   return res.json({
     name: req.user.name || "",
     email: req.user.email || "",
@@ -54,7 +56,6 @@ export const getMyListings = async (req, res) => {
       createdAt: -1,
     });
 
-    // Shape to match what MyAccountListings.jsx expects
     const formatted = listings.map((item) => ({
       id: item._id.toString(),
       status: item.status || "Active listing",
@@ -62,7 +63,6 @@ export const getMyListings = async (req, res) => {
         typeof item.price === "number"
           ? `Listed at ₹${item.price}`
           : "Listed",
-      // you can send extra fields if you ever need them later:
       title: item.title,
       price: item.price,
       createdAt: item.createdAt,
@@ -82,7 +82,7 @@ export const deleteMyListing = async (req, res) => {
 
     const deleted = await Listing.findOneAndDelete({
       _id: id,
-      user: req.user._id, // ensures user can delete only their own listing
+      user: req.user._id, 
     });
 
     if (!deleted) {
@@ -98,6 +98,43 @@ export const deleteMyListing = async (req, res) => {
 
 // GET /api/my-orders
 export const getMyOrders = (req, res) => {
-  // No orders system yet → return empty array
   return res.json([]);
+};
+
+// ✅ ADDED: Change Password Logic
+export const changePassword = async (req, res) => {
+  try {
+    const { oldPassword, newPassword } = req.body;
+
+    if (!oldPassword || !newPassword) {
+      return res.status(400).json({ message: "Please provide both old and new passwords." });
+    }
+
+    // We must fetch the user explicitly to get the 'passwordHash'
+    // (req.user from middleware might not have the hash depending on implementation)
+    const user = await User.findById(req.user._id);
+    
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // Check if old password is correct
+    const isMatch = await bcrypt.compare(oldPassword, user.passwordHash);
+    if (!isMatch) {
+      return res.status(400).json({ message: "Incorrect old password." });
+    }
+
+    // Hash the new password
+    const salt = await bcrypt.genSalt(10);
+    const hashedPassword = await bcrypt.hash(newPassword, salt);
+
+    // Update and save
+    user.passwordHash = hashedPassword;
+    await user.save();
+
+    return res.json({ message: "Password updated successfully." });
+  } catch (err) {
+    console.error("Error in changePassword:", err);
+    return res.status(500).json({ message: "Server error changing password." });
+  }
 };

@@ -21,6 +21,7 @@ const initialProduct = {
   category: "",
   condition: "",
   imageUrls: ["/image.png", "/image-2.png", "/image-3.png", "/image-4.png"],
+  sellerId: null, // Placeholder for seller ID
 };
 
 export const ProductDetailWithLogin = () => {
@@ -114,6 +115,9 @@ export const ProductDetailWithLogin = () => {
           imageUrls,
           category: data.category || "",
           condition: data.condition || "",
+          // ✅ Capture Seller ID. 
+          // Depending on if your backend populates 'user', it might be data.user._id or just data.user
+          sellerId: data.user?._id || data.user || data.sellerId,
         };
 
         setSelectedProduct(mapped);
@@ -205,44 +209,80 @@ export const ProductDetailWithLogin = () => {
   const canReserve = Boolean(effectiveListingId);
 
   const handleReserve = async () => {
-  if (!canReserve || isReserved || isReserving) return;
+    if (!canReserve || isReserved || isReserving) return;
 
-  try {
-    setIsReserving(true);
+    try {
+      setIsReserving(true);
 
-    const res = await fetch(`${API_BASE_URL}/api/orders`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      credentials: "include",
-      body: JSON.stringify({ listingId: effectiveListingId }),
-    });
+      const res = await fetch(`${API_BASE_URL}/api/orders`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ listingId: effectiveListingId }),
+      });
 
-    const data = await res.json().catch(() => ({}));
+      const data = await res.json().catch(() => ({}));
 
-    if (res.status === 401) {
-      alert("Your session has expired. Please log in again.");
-      navigate("/login");
-      return;
-    }
-
-    if (!res.ok) {
-      alert(data.message || "Failed to reserve item. Please try again.");
-      if (data.message && data.message.includes("already reserved")) {
-        setIsReserved(true); // lock the button if backend says it's already reserved
+      if (res.status === 401) {
+        alert("Your session has expired. Please log in again.");
+        navigate("/login");
+        return;
       }
+
+      if (!res.ok) {
+        alert(data.message || "Failed to reserve item. Please try again.");
+        if (data.message && data.message.includes("already reserved")) {
+          setIsReserved(true); // lock the button if backend says it's already reserved
+        }
+        return;
+      }
+
+      setIsReserved(true);
+      alert("Item reserved successfully! You can see it in My Reserved Items.");
+    } catch (err) {
+      console.error("Error creating reservation:", err);
+      alert("Could not connect to server. Please try again.");
+    } finally {
+      setIsReserving(false);
+    }
+  };
+
+  // ---------- CHAT LOGIC (NEW) ----------
+  const handleChatWithSeller = async () => {
+    const sellerId = selectedProduct.sellerId;
+
+    if (!sellerId) {
+      alert("Seller information is missing for this item.");
       return;
     }
 
-    setIsReserved(true);
-    alert("Item reserved successfully! You can see it in My Reserved Items.");
-  } catch (err) {
-    console.error("Error creating reservation:", err);
-    alert("Could not connect to server. Please try again.");
-  } finally {
-    setIsReserving(false);
-  }
-};
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/chat/start`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        credentials: "include",
+        body: JSON.stringify({ recipientId: sellerId }),
+      });
 
+      if (res.status === 401) {
+        alert("Please log in to chat.");
+        navigate("/login");
+        return;
+      }
+
+      if (res.ok) {
+        const data = await res.json();
+        // Navigate to Chat page, passing the Conversation ID
+        navigate("/chat", { state: { conversationId: data.conversationId } });
+      } else {
+        const err = await res.json();
+        alert(err.message || "Could not start chat.");
+      }
+    } catch (err) {
+      console.error("Error starting chat:", err);
+      alert("Something went wrong. Please try again.");
+    }
+  };
 
   return (
     <div className="bg-white w-full min-w-[1440px] min-h-[2115px] relative flex flex-col">
@@ -397,7 +437,7 @@ export const ProductDetailWithLogin = () => {
             {/* Chat With Seller → chat */}
             <button
               type="button"
-              onClick={() => navigate("/chat")}
+              onClick={handleChatWithSeller} // ✅ Updated to use new logic
               className="all-[unset] box-border flex h-[52px] items-center justify-center gap-2 px-6 py-3.5 relative self-stretch w-full bg-black rounded-[20px] shadow-button-shadow transition-all duration-[0.2s] ease-[ease] hover:scale-[1.02] active:scale-[0.98] cursor-pointer"
             >
               <div className="relative flex items-center justify-center w-fit mt-[-1.00px] font-small-text text-white">

@@ -1,36 +1,68 @@
-// backend/server.js
-import express from "express";
 import dotenv from "dotenv";
+// load env right away so other imported modules see process.env
+dotenv.config();
+
+import express from "express";
 import cors from "cors";
 import cookieParser from "cookie-parser";
-import nodemailer from "nodemailer";
 import connectDB from "./config/database.js";
-import feedbackRoutes from "./routes/feedbackRoutes.js";
+import http from "http"; // ✅ Required for Socket.io
+import { Server as IOServer } from "socket.io"; // ✅ Socket.io
 
-dotenv.config();
+// OTP helpers & models
+import crypto from "crypto";
+import Otp from "./models/Otp.js";
+import User from "./models/User.js";  // ✅ ADDED: Needed for finding user to reset pass
+import bcrypt from "bcryptjs";        // ✅ ADDED: Needed for hashing new password
+import { sendMail } from "./utils/mailer.js";
+
+// Route imports
+import userRoutes from "./routes/user/userRoutes.js";
+import authRoutes from "./routes/auth/authRoutes.js";
+import listingRoutes from "./routes/listing/listingRoutes.js";
+import adminRoutes from "./routes/adminRoutes.js";
+import orderRoutes from "./routes/order/orderRoutes.js";
+import feedbackRoutes from "./routes/feedbackRoutes.js";
+import chatRoutes from "./routes/chat/chatRoutes.js"; 
 
 const app = express();
 const PORT = process.env.PORT || 5000;
 
-// 🔹 Tell Express it’s behind a proxy (Render), so secure cookies work properly
+// ✅ Create HTTP server to wrap Express (needed for Socket.io)
+const server = http.createServer(app);
+
+// ✅ Initialize Socket.io with same CORS config
+const io = new IOServer(server, {
+  cors: {
+    origin: [
+      "http://localhost:5173",         // Vite dev
+      "http://localhost:4173",         // Vite preview
+      "https://thaparkart.tiiny.site", // Tiiny Host frontend
+      "https://thaparkart.onrender.com" // Render frontend
+    ],
+    credentials: true,
+  },
+});
+
+// tell Express it’s behind a proxy (Render), so secure cookies work properly
 app.set("trust proxy", 1);
 
 console.log("MONGO_URI from env:", process.env.MONGO_URI);
 connectDB();
 
+// Express Middleware
 app.use(
   cors({
     origin: [
-      "http://localhost:5173",         // Vite dev
-      "http://localhost:4173",         // Vite preview (npm run preview)
-      "https://thaparkart.tiiny.site", // Tiiny Host frontend
-      "https://thaparkart.onrender.com" // (optional) Netlify if you use it
+      "http://localhost:5173",
+      "http://localhost:4173",
+      "https://thaparkart.tiiny.site",
+      "https://thaparkart.onrender.com"
     ],
     credentials: true,
   })
 );
 
-// 🔹 You can keep 10mb or bump to 25mb – leaving 25mb is safer
 app.use(
   express.json({
     limit: "25mb",
@@ -46,136 +78,159 @@ app.use(
 
 app.use(cookieParser());
 
-/* =======================
-   OTP SERVICE (GENERIC SMTP)
-   ======================= */
-
-const otpStore = new Map();
-
-function generateOtp() {
-  return Math.floor(100000 + Math.random() * 900000).toString(); // 6-digit
-}
-
-// sanity check for env
-if (
-  !process.env.SMTP_HOST ||
-  !process.env.SMTP_PORT ||
-  !process.env.SMTP_USER ||
-  !process.env.SMTP_PASS
-) {
-  console.error("❌ SMTP configuration missing in .env");
-}
-
-// create transporter using generic SMTP
-const transporter = nodemailer.createTransport({
-  host: process.env.SMTP_HOST,
-  port: Number(process.env.SMTP_PORT) || 587,
-  secure: false, // usually false for port 587
-  auth: {
-    user: process.env.SMTP_USER,
-    pass: process.env.SMTP_PASS,
-  },
+// ✅ Attach 'io' to every request so API routes can send real-time alerts
+app.use((req, res, next) => {
+  req.io = io;
+  next();
 });
 
-// send OTP
+/* =======================
+   SOCKET.IO EVENTS
+   ======================= */
+io.on("connection", (socket) => {
+  console.log("Socket connected:", socket.id);
+
+  // Join a personal room based on User ID
+  socket.on("join", (userId) => {
+    if (userId) {
+      socket.join(String(userId));
+      console.log(`User ${userId} joined their notification room.`);
+    }
+  });
+
+  socket.on("disconnect", () => {
+    console.log("Socket disconnected:", socket.id);
+  });
+});
+
+/* =======================
+   OTP SERVICE
+   ======================= */
+
+// helper - generate 6-digit code
+function generateOtpCode() {
+  return Math.floor(100000 + Math.random() * 900000).toString();
+}
+
+// helper - hash OTP with sha256
+function hashOtp(otp) {
+  return crypto.createHash("sha256").update(otp).digest("hex");
+}
+
+const OTP_TTL_MINUTES = Number(process.env.OTP_TTL_MINUTES) || 5;
+
+// POST /api/auth/send-otp
 app.post("/api/auth/send-otp", async (req, res) => {
   try {
     const { email } = req.body;
-
     if (!email || !email.endsWith("@thapar.edu")) {
-      return res
-        .status(400)
-        .json({ message: "Valid @thapar.edu email required." });
+      return res.status(400).json({ message: "Valid @thapar.edu email required." });
     }
 
-    if (
-      !process.env.SMTP_HOST ||
-      !process.env.SMTP_PORT ||
-      !process.env.SMTP_USER ||
-      !process.env.SMTP_PASS
-    ) {
-      return res
-        .status(500)
-        .json({ message: "Email service not configured on server." });
-    }
+    const code = generateOtpCode();
+    const otpHash = hashOtp(code);
+    const expiresAt = new Date(Date.now() + OTP_TTL_MINUTES * 60 * 1000);
 
-    const code = generateOtp();
-    const expiresAt = Date.now() + 5 * 60 * 1000; // 5 minutes
+    // remove prior OTPs for this email and create new
+    await Otp.deleteMany({ email: email.toLowerCase() });
+    await Otp.create({ email: email.toLowerCase(), otpHash, expiresAt });
 
-    otpStore.set(email.toLowerCase(), { code, expiresAt });
+    // send email
+    const subject = "ThaparKart — Your OTP";
+    const text = `Your ThaparKart OTP is ${code}. It expires in ${OTP_TTL_MINUTES} minute(s).`;
+    const html = `<p>Your ThaparKart OTP is <strong>${code}</strong>.</p><p>It expires in ${OTP_TTL_MINUTES} minute(s).</p>`;
 
-    const mailOptions = {
-      from:
-        process.env.SMTP_FROM || `"ThaparKart" <no-reply@thaparkart.local>`,
-      to: email,
-      subject: "Your ThaparKart OTP",
-      text: `Your ThaparKart OTP is: ${code}. It is valid for 5 minutes.`,
-      html: `<p>Your ThaparKart OTP is: <b>${code}</b></p><p>It is valid for 5 minutes.</p>`,
-    };
+    await sendMail({ to: email, subject, text, html });
 
-    const info = await transporter.sendMail(mailOptions);
-    console.log("✅ OTP email sent:", info.messageId);
-
+    console.log(`OTP sent to ${email} (expires ${expiresAt.toISOString()})`);
     return res.json({ message: "OTP sent to your email." });
   } catch (err) {
-    console.error("❌ Error sending OTP:", err);
-    return res
-      .status(500)
-      .json({ message: "Failed to send OTP. Please try again." });
+    console.error("send-otp error:", err);
+    return res.status(500).json({ message: "Failed to send OTP. Please try again." });
   }
 });
 
-// verify OTP
-app.post("/api/auth/verify-otp", (req, res) => {
+// POST /api/auth/verify-otp
+app.post("/api/auth/verify-otp", async (req, res) => {
   try {
     const { email, otp } = req.body;
-
     if (!email || !otp) {
-      return res
-        .status(400)
-        .json({ message: "Email and OTP are required." });
+      return res.status(400).json({ message: "Email and OTP are required." });
     }
-
-    const record = otpStore.get(email.toLowerCase());
+    
+    const record = await Otp.findOne({ email: email.toLowerCase() });
     if (!record) {
-      return res.status(400).json({
-        message: "No OTP found for this email. Please request a new one.",
-      });
+      return res.status(400).json({ message: "No OTP found. Please request a new one." });
     }
 
-    const { code, expiresAt } = record;
-
-    if (Date.now() > expiresAt) {
-      otpStore.delete(email.toLowerCase());
-      return res
-        .status(400)
-        .json({ message: "OTP expired. Please request a new one." });
+    if (new Date() > record.expiresAt) {
+      await Otp.deleteMany({ email: email.toLowerCase() });
+      return res.status(400).json({ message: "OTP expired. Please request a new one." });
     }
 
-    if (otp !== code) {
+    const providedHash = hashOtp(otp);
+    if (providedHash !== record.otpHash) {
       return res.status(400).json({ message: "Incorrect OTP." });
     }
 
-    otpStore.delete(email.toLowerCase());
+    // valid -> delete OTP records for this email to prevent reuse
+    await Otp.deleteMany({ email: email.toLowerCase() });
 
     return res.json({ message: "OTP verified successfully." });
   } catch (err) {
-    console.error("❌ Error verifying OTP:", err);
-    return res
-      .status(500)
-      .json({ message: "Failed to verify OTP. Please try again." });
+    console.error("verify-otp error:", err);
+    return res.status(500).json({ message: "Failed to verify OTP. Please try again." });
+  }
+});
+
+// ✅ NEW: POST /api/auth/reset-password (For Forgot Password Flow)
+app.post("/api/auth/reset-password", async (req, res) => {
+  try {
+    const { email, otp, newPassword } = req.body;
+
+    if (!email || !otp || !newPassword) {
+      return res.status(400).json({ message: "All fields are required." });
+    }
+
+    // 1. Verify OTP First
+    const record = await Otp.findOne({ email: email.toLowerCase() });
+    if (!record) {
+      return res.status(400).json({ message: "No OTP found. Request a new one." });
+    }
+    if (new Date() > record.expiresAt) {
+      await Otp.deleteMany({ email: email.toLowerCase() });
+      return res.status(400).json({ message: "OTP expired." });
+    }
+    const providedHash = hashOtp(otp);
+    if (providedHash !== record.otpHash) {
+      return res.status(400).json({ message: "Incorrect OTP." });
+    }
+
+    // 2. Find User
+    const user = await User.findOne({ email: email.toLowerCase() });
+    if (!user) {
+      return res.status(404).json({ message: "User not found." });
+    }
+
+    // 3. Hash New Password
+    const salt = await bcrypt.genSalt(10);
+    user.passwordHash = await bcrypt.hash(newPassword, salt);
+    await user.save();
+
+    // 4. Cleanup OTP
+    await Otp.deleteMany({ email: email.toLowerCase() });
+
+    return res.json({ message: "Password reset successfully. Please login." });
+
+  } catch (err) {
+    console.error("Reset password error:", err);
+    return res.status(500).json({ message: "Server error resetting password." });
   }
 });
 
 /* =======================
-   EXISTING ROUTES
+   ROUTES
    ======================= */
-
-import userRoutes from "./routes/user/userRoutes.js";
-import authRoutes from "./routes/auth/authRoutes.js";
-import listingRoutes from "./routes/listing/listingRoutes.js";
-import adminRoutes from "./routes/adminRoutes.js";
-import orderRoutes from "./routes/order/orderRoutes.js";
 
 app.use("/api/auth", authRoutes);
 app.use("/api", userRoutes);
@@ -183,12 +238,15 @@ app.use("/api/listings", listingRoutes);
 app.use("/api/feedback", feedbackRoutes);
 app.use("/api/admin", adminRoutes);
 app.use("/api/orders", orderRoutes);
+app.use("/api/chat", chatRoutes); // ✅ Chat
+
 app.use("/uploads", express.static("uploads"));
 
 app.get("/", (req, res) => {
   res.json({ message: "ThaparKart backend running" });
 });
 
-app.listen(PORT, () => {
+// ✅ CHANGED: Use server.listen instead of app.listen for Socket.io to work
+server.listen(PORT, () => {
   console.log(`Server running on http://localhost:${PORT}`);
 });

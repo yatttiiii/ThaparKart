@@ -11,6 +11,7 @@ import facebookIcon from "../assets/icons/facebook.svg";
 import instagramIcon from "../assets/icons/instagram.svg";
 import linkedinIcon from "../assets/icons/linkedin.svg";
 import youtubeIcon from "../assets/icons/youtube.svg";
+import image9 from "../assets/image-9.png";
 
 import "../styles/About.css";
 
@@ -170,12 +171,18 @@ export const About = () => {
             </div>
           </div>
 
-          {/* Right-side Card */}
-          <aside className="w-[38%] rounded-[20px] shadow-[0px_6px_20px_rgba(0,0,0,0.05)] p-6 bg-[#f7f7f7]">
-            <div className="h-[300px] rounded-lg bg-white shadow-[0px_6px_20px_rgba(0,0,0,0.03)] flex items-center justify-center">
-              <span className="text-[#828282]">Illustration / Image</span>
-            </div>
-          </aside>
+          {/* Right-side Card - replaced placeholder with image9 */}
+<aside className="w-[50%] min-w-0 rounded-[20px] shadow-[0px_6px_20px_rgba(0,0,0,0.05)] p-6 bg-[#f7f7f7]">
+  <div className="h-[300px] rounded-lg bg-white shadow-[0px_6px_20px_rgba(0,0,0,0.05)] flex items-center justify-center overflow-hidden">
+    <img
+      src={image9}
+      alt="ThaparKart illustration"
+      loading="lazy"
+      className="h-full w-full max-w-full object-cover"
+    />
+  </div>
+</aside>
+
         </div>
 
         {/* Contact Form */}

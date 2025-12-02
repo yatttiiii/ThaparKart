@@ -1,17 +1,18 @@
+// backend/controllers/authController.js
 import bcrypt from "bcrypt";
 import jwt from "jsonwebtoken";
 import User from "../models/User.js";
+import Otp from "../models/Otp.js";
+import crypto from "crypto";
 
 const JWT_EXPIRES_IN = "7d";
-
-// Detect production (Render runs Node with NODE_ENV=production)
 const isProduction = process.env.NODE_ENV === "production";
 
 export const registerUser = async (req, res) => {
   try {
-    const { name, email, password } = req.body;
+    const { name, email, password, otp } = req.body;
 
-    if (!name || !email || !password) {
+    if (!name || !email || !password || !otp) {
       return res.status(400).json({ message: "All fields are required." });
     }
 
@@ -21,6 +22,26 @@ export const registerUser = async (req, res) => {
         .json({ message: "Please use a valid @thapar.edu email." });
     }
 
+    // Verify OTP from DB
+    const record = await Otp.findOne({ email: email.toLowerCase() });
+    if (!record) {
+      return res.status(400).json({ message: "OTP missing or expired." });
+    }
+
+    if (new Date() > record.expiresAt) {
+      await Otp.deleteMany({ email: email.toLowerCase() });
+      return res.status(400).json({ message: "OTP expired. Request a new one." });
+    }
+
+    const providedHash = crypto.createHash("sha256").update(otp).digest("hex");
+    if (providedHash !== record.otpHash) {
+      return res.status(400).json({ message: "Invalid OTP." });
+    }
+
+    // OTP valid -> remove it to prevent reuse
+    await Otp.deleteMany({ email: email.toLowerCase() });
+
+    // Check if user already exists
     const existing = await User.findOne({ email: email.toLowerCase() });
     if (existing) {
       return res
@@ -77,7 +98,7 @@ export const loginUser = async (req, res) => {
       { expiresIn: JWT_EXPIRES_IN }
     );
 
-    // IMPORTANT: Cross-site cookie setup for Render <-> TiinyHost
+    // Cross-site cookie setup for Render <-> TiinyHost
     res.cookie("token", token, {
       httpOnly: true,
       secure: isProduction,             // must be true on Render
@@ -109,3 +130,5 @@ export const logoutUser = (req, res) => {
 
   return res.json({ message: "Logged out successfully." });
 };
+
+export default { registerUser, loginUser, logoutUser };

@@ -16,8 +16,10 @@ export const Register = () => {
   const [verifyPassword, setVerifyPassword] = useState("");
   const [otp, setOtp] = useState("");
   const [isOtpCooldown, setIsOtpCooldown] = useState(false);
+  const [cooldownSeconds, setCooldownSeconds] = useState(0);
 
-  const handleSendOtp = () => {
+  // send OTP to backend
+  const handleSendOtp = async () => {
     if (isOtpCooldown) return;
 
     if (!email.endsWith("@thapar.edu")) {
@@ -25,24 +27,48 @@ export const Register = () => {
       return;
     }
 
-    // mock for now
-    alert("OTP sent to your @thapar.edu email (mock).");
+    try {
+      const res = await fetch(`${API_BASE_URL}/api/auth/send-otp`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ email }),
+      });
 
-    setIsOtpCooldown(true);
+      const data = await res.json();
+      if (!res.ok) {
+        alert(data.message || "Failed to send OTP.");
+        return;
+      }
+
+      alert("OTP sent to your @thapar.edu email.");
+      setIsOtpCooldown(true);
+      setCooldownSeconds(30); // 30-second cooldown (UI)
+    } catch (err) {
+      console.error("send-otp error:", err);
+      alert("Could not send OTP. Try again.");
+    }
   };
 
   // Cooldown timer: 30 seconds
   useEffect(() => {
     if (!isOtpCooldown) return;
 
-    const timeout = setTimeout(() => {
-      setIsOtpCooldown(false);
-    }, 30000);
+    setCooldownSeconds((s) => (s > 0 ? s : 30));
+    const interval = setInterval(() => {
+      setCooldownSeconds((s) => {
+        if (s <= 1) {
+          clearInterval(interval);
+          setIsOtpCooldown(false);
+          return 0;
+        }
+        return s - 1;
+      });
+    }, 1000);
 
-    return () => clearTimeout(timeout);
+    return () => clearInterval(interval);
   }, [isOtpCooldown]);
 
-  // 🔹 UPDATED: call backend /api/auth/register
+  // register with otp verification
   const handleRegister = async () => {
     if (!name.trim()) {
       alert("Please enter your name.");
@@ -75,11 +101,11 @@ export const Register = () => {
         headers: {
           "Content-Type": "application/json",
         },
-        // we’re not sending OTP to backend yet, backend only expects name/email/password
         body: JSON.stringify({
           name,
           email,
           password,
+          otp,
         }),
       });
 
@@ -190,7 +216,7 @@ export const Register = () => {
                 }`}
               >
                 <span className="text-sm md:text-base font-medium">
-                  {isOtpCooldown ? "Sent" : "Send OTP"}
+                  {isOtpCooldown ? `Sent (${cooldownSeconds}s)` : "Send OTP"}
                 </span>
               </button>
             </div>
